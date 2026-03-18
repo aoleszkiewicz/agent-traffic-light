@@ -10,7 +10,7 @@ class EnvConfig(BaseModel):
     min_green_steps: int = Field(default=4, description="Minimum green phase duration")
     yellow_steps: int = Field(default=2, description="Yellow transition duration")
     max_steps: int = Field(default=500, description="Episode length")
-    alpha: float = Field(default=0.3, description="Cooperation coefficient for reward")
+    alpha: float = Field(default=0.5, description="Cooperation coefficient for reward")
     max_queue: int = Field(default=50, description="Maximum queue length per road")
 
 

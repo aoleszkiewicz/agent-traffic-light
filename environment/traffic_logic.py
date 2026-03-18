@@ -37,9 +37,18 @@ def resolve_phase_change(
         return current_green, False
 
     # action=1 means "request change"
-    if current_green == "A" and action_a == 1:
+    # Either the green agent voluntarily yields, or the red agent demands green.
+    # If both request change simultaneously, requests cancel out (no switch).
+    wants_change_a = action_a == 1
+    wants_change_b = action_b == 1
+
+    if wants_change_a and wants_change_b:
+        # Conflicting requests cancel out
+        return current_green, False
+
+    if current_green == "A" and (wants_change_a or wants_change_b):
         return "B", True
-    if current_green == "B" and action_b == 1:
+    if current_green == "B" and (wants_change_a or wants_change_b):
         return "A", True
 
     return current_green, False

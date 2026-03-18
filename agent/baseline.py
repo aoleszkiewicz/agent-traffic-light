@@ -9,16 +9,24 @@ from environment.traffic_env import TrafficLightEnv
 
 
 class FixedCyclePolicy:
-    """Alternates green phase every `cycle_length` steps."""
+    """Alternates green phase every `cycle_length` steps.
+
+    Only the currently-green agent requests a change. The red agent always
+    outputs 0 (keep) to avoid triggering the cancel-out rule.
+    """
 
     def __init__(self, cycle_length: int = 15):
         self.cycle_length = cycle_length
         self._step = 0
 
     def predict(self, obs: np.ndarray) -> int:
-        """Return action: 1 (request change) every cycle_length steps, else 0."""
+        """Return action: 1 (request change) at cycle boundary if green, else 0."""
+        # obs[2] is own_phase (normalized: 0.5=green, 0=red, 1=yellow)
+        own_phase = obs[2] if obs is not None else 0
+        is_green = abs(own_phase - 0.5) < 0.01  # 0.5 = green (1.0/2.0 normalized)
+
         self._step += 1
-        if self._step % self.cycle_length == 0:
+        if is_green and self._step % self.cycle_length == 0:
             return 1
         return 0
 

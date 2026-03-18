@@ -76,10 +76,10 @@ def _evaluate_with_render(args, config):
         total_reward = 0.0
 
         while env.agents:
-            # Use agent light_A obs for the shared policy
-            obs_a = obs["light_A"]
-            action, _ = model.predict(obs_a, deterministic=True)
-            actions = {"light_A": int(action), "light_B": int(action)}
+            # Predict independently for each agent (shared policy, different obs)
+            action_a, _ = model.predict(obs["light_A"], deterministic=True)
+            action_b, _ = model.predict(obs["light_B"], deterministic=True)
+            actions = {"light_A": int(action_a), "light_B": int(action_b)}
             obs, rewards, _, _, _ = env.step(actions)
             total_reward += rewards.get("light_A", 0) + rewards.get("light_B", 0)
             env.render()

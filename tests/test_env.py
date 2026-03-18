@@ -72,9 +72,15 @@ class TestResolvePhaseChange:
         assert phase == "A"
         assert not changed
 
-    def test_only_current_green_agent_can_switch(self):
-        # light_B requests change but A is green — no change
+    def test_red_agent_can_request_green(self):
+        # light_B requests change while A is green — switch to B
         phase, changed = resolve_phase_change(0, 1, "A", 10, 4)
+        assert phase == "B"
+        assert changed
+
+    def test_both_request_cancels_out(self):
+        # Both request change — conflicting, no switch
+        phase, changed = resolve_phase_change(1, 1, "A", 10, 4)
         assert phase == "A"
         assert not changed
 

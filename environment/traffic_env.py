@@ -42,13 +42,10 @@ class TrafficLightEnv(ParallelEnv):
 
     @functools.lru_cache(maxsize=None)
     def observation_space(self, agent: str) -> gym.Space:
-        # [own_queue, other_queue, own_phase, time_in_phase]
+        # [own_queue, other_queue, own_phase, time_in_phase] — all normalized to [0, 1]
         return spaces.Box(
             low=np.array([0, 0, 0, 0], dtype=np.float32),
-            high=np.array(
-                [self.cfg.max_queue, self.cfg.max_queue, 2, self.cfg.max_steps],
-                dtype=np.float32,
-            ),
+            high=np.array([1, 1, 1, 1], dtype=np.float32),
         )
 
     @functools.lru_cache(maxsize=None)
@@ -64,13 +61,16 @@ class TrafficLightEnv(ParallelEnv):
             phase_a = 1.0 if self._current_green == "A" else 0.0
             phase_b = 1.0 if self._current_green == "B" else 0.0
 
+        # Normalize observations to [0, 1] range for stable training
+        mq = self.cfg.max_queue
+        ms = self.cfg.max_steps
         return {
             "light_A": np.array(
-                [self._queue_a, self._queue_b, phase_a, self._time_in_phase],
+                [self._queue_a / mq, self._queue_b / mq, phase_a / 2.0, self._time_in_phase / ms],
                 dtype=np.float32,
             ),
             "light_B": np.array(
-                [self._queue_b, self._queue_a, phase_b, self._time_in_phase],
+                [self._queue_b / mq, self._queue_a / mq, phase_b / 2.0, self._time_in_phase / ms],
                 dtype=np.float32,
             ),
         }
@@ -146,9 +146,10 @@ class TrafficLightEnv(ParallelEnv):
                     self.cfg.green_drain_rate,
                 )
 
-        # --- rewards ---
-        reward_a = -(self._queue_a + self.cfg.alpha * self._queue_b)
-        reward_b = -(self._queue_b + self.cfg.alpha * self._queue_a)
+        # --- rewards (normalized to approx [-1, 0]) ---
+        scale = self.cfg.max_queue * (1.0 + self.cfg.alpha)
+        reward_a = -(self._queue_a + self.cfg.alpha * self._queue_b) / scale
+        reward_b = -(self._queue_b + self.cfg.alpha * self._queue_a) / scale
 
         rewards = {"light_A": float(reward_a), "light_B": float(reward_b)}
 

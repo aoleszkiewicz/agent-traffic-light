@@ -24,4 +24,10 @@ def make_sb3_env(
     env = ss.pettingzoo_env_to_vec_env_v1(env)
     env = ss.concat_vec_envs_v1(env, n_envs, num_cpus=1, base_class="stable_baselines3")
 
+    # SuperSuit's ConcatVecEnv lacks a seed() method that SB3 expects.
+    # SB3's wrapper delegates seed() to env.venv, so patch the inner env.
+    inner = env.venv if hasattr(env, "venv") else env
+    if not hasattr(inner, "seed"):
+        inner.seed = lambda seed=None: [seed] * env.num_envs
+
     return env
