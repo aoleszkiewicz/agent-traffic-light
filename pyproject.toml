@@ -1,0 +1,21 @@
+[project]
+name = "agent-traffic-signal"
+version = "0.1.0"
+description = "Add your description here"
+requires-python = ">=3.13"
+dependencies = [
+    "fastapi>=0.135.1",
+    "gymnasium>=1.2.3",
+    "httpx>=0.28.1",
+    "matplotlib>=3.10.8",
+    "numpy>=2.4.3",
+    "optuna>=4.8.0",
+    "pettingzoo>=1.25.0",
+    "pydantic>=2.12.5",
+    "pytest>=9.0.2",
+    "redis>=7.3.0",
+    "stable-baselines3>=2.7.1",
+    "supersuit>=3.10.0",
+    "torch>=2.10.0",
+    "uvicorn>=0.42.0",
+]
